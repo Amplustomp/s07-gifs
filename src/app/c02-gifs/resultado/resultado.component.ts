@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { GifsService } from '../services/gifs.service';
 
 @Component({
   selector: 'app-resultado',
@@ -7,21 +8,15 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ResultadoComponent implements OnInit {
 
-  constructor() { }
+  constructor(private resultadosService:GifsService) { }
 
   ngOnInit(): void {
   }
 
+// Ejecuta el método del servicio
+  //  el cual retorna un arreglo de imágenes
   get getResultados(){
-    //return this.resultados.getResultados
-    return [
-           {title:"uno",images:{downsized_medium:{url:"https://www.ortopediasmasvida.cl/media/catalog/product/s/i/silla-de-ruedas-electrica-ky120-cod-1085.jpg"}}}
-           ,{title:"dos",images:{downsized_medium:{url:"https://www.ortopediasmasvida.cl/media/catalog/product/s/i/silla-de-ruedas-electrica-ky120-cod-1085.jpg"}}}
-           ,{title:"tres",images:{downsized_medium:{url:"https://www.ortopediasmasvida.cl/media/catalog/product/s/i/silla-de-ruedas-electrica-ky120-cod-1085.jpg"}}}
-           ,{title:"cuatro",images:{downsized_medium:{url:"https://www.ortopediasmasvida.cl/media/catalog/product/s/i/silla-de-ruedas-electrica-ky120-cod-1085.jpg"}}}
-           ,{title:"cinco",images:{downsized_medium:{url:"https://www.ortopediasmasvida.cl/media/catalog/product/s/i/silla-de-ruedas-electrica-ky120-cod-1085.jpg"}}}
-           ,{title:"seis",images:{downsized_medium:{url:"https://www.ortopediasmasvida.cl/media/catalog/product/s/i/silla-de-ruedas-electrica-ky120-cod-1085.jpg"}}}
-          ]
+    return this.resultadosService.getResultados
   }
 
 }
