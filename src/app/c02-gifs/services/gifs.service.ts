@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Gifs } from 'src/app/gif.interface';
+import { HttpClient,HttpParams } from '@angular/common/http';
+import { Gifs, GifsHttpResponse } from 'src/app/gif.interface';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +12,7 @@ export class GifsService {
     private servicioUrl = "https://api.giphy.com/v1/gifs/"
   
     // ApiKey Obtenida del Sitio
-    private apiKey = "ajUjHÑJKLDJKLSÑ[SÑDDJDLDJKDLfUCD9v"
+    private apiKey = "CWrDfA9qqBouHasFYjW5GMG7q4Bk3EYv"
     
     // Arreglo de Historia
     private _historia:String[]=["ultraman","heman","messi","chavo","jerry"]
@@ -20,17 +22,23 @@ export class GifsService {
 
 
     // Solo para visualizar cuando se ejecuta por primera vez
-    constructor() { console.log("Constructor GifsService   *******************  ")}
 
+    constructor(private httpcustom:HttpClient) { 
+      console.log("Constructor GifsService   *******************  ")
+      this._historia = JSON.parse(localStorage.getItem("historia")!) || []
+      this.resultados = JSON.parse(localStorage.getItem("resultados")!) || []
+    }
 
-// Método que ejecutará el componente buscar y el sidebar
-buscarGifts(query:string){
+ // Método que ejecutará el componente buscar y el sidebar
+ buscarGifts(query:string){
   console.log("buscarGifts final debiera ser Observable")
 
   // Revisa el historial
   query = this.revisaHistoria(query)
   //this.buscarGiftsSincronico(query)
-  this.buscarGiftsAsincronico(query)
+  //  this.buscarGiftsAsincronico(query)
+  this.buscarGiftsSuscribe(query)
+
 }
 
     // Retorna el arreglo de _Historial
@@ -108,7 +116,7 @@ buscarGifts(query:string){
    buscarGiftsAsincronico(query:String){
     //let resp = await fetch("https://api.giphy.com/v1/gifs/search?api_key=XXXXX&q=messi&limit=10")
     // configuramos ls url, con la api_key, la palabra y el limite
-    let stUrl = `${this.servicioUrl}search?api_key=${this.apiKey}&q=${query}&limit=10`
+    let stUrl = `${this.servicioUrl}search?api_key=${this.apiKey}&q=${query}&limit=4`
  
     // Para poder ejecutarlo localmente, 
     // siempre y cuando haya iniciado el servicio JSonServer
@@ -137,6 +145,55 @@ buscarGifts(query:string){
     console.log("555555555555555555555555555555555555555555555")     
    }
 
-   
+
+
+   async buscarGiftsSuscribe(query:string){
+    // Creaamos un objeto en el cual pueda enviar los parámetros
+    const parametros = new HttpParams()
+                  .set("api_key",this.apiKey)
+                  .set("q",query)
+                  .set("limit",4)
+    console.log("Parametros ", parametros)              
+
+    //********************************************************** 
+    //this.http.get(`https://api.giphy.com/v1/gifs/search?api_key=aHbvuBCKynDJUdSTwy4mJIrYoffUCD9v&q=chavo&limit=10`)
+    // Sin respuesta de estructura
+    // Con respuesta de estructura llamada GifsHttpResponse la cual declaramo como interfaces
+    //this.http.get<GifsHttpResponse>(`https://api.giphy.com/v1/gifs/search?api_key=${this.apiKey}&q=${query}&limit=10`)
+    //this.http.get(`https://api.giphy.com/v1/gifs/search?api_key=${this.apiKey}&q=${query}&limit=10`)
+
+     let stUrl = `${this.servicioUrl}search`
+    //let stUrl = `${this.servicioUrl}search + query`
+    //stUrl = "http://localhost:3000/" + query
+    console.log("1111111111111111111111111111111111111111")
+    this.httpcustom.get<GifsHttpResponse>(stUrl,{params:parametros})
+        .subscribe((resp)=>{   // funciona por <GifHttpResponse> colocado en el get
+            console.log("22222222222222222222222222222222222")
+            console.log("Observable Respuesta ",resp.data)
+            this.resultados = resp.data
+            console.log("3333333333333333333333333333333")
+            
+            // Grabamos los resultados en el LocalStorage
+            localStorage.setItem("resultados",JSON.stringify(this.resultados))
+          })
+     console.log("555555555555555555555555555555555555555555555")     
+     
+     // Grabamos la historia en el LocalStorage
+     localStorage.setItem("historia",JSON.stringify(this._historia))
+
+  }
+
+
+  
+  // Debiera estar en el formulario, unsubscribe$,ngOnDestroy
+  private unsubscribe$ = new Subject<void>();
+  ngOnDestroy() {
+    console.log("onDestroy 0000")
+    this.unsubscribe$.next()
+    this.unsubscribe$.complete()
+    console.log("onDestroy 1111")
+  }
+
+  
 
 }
